@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Aqua — су көздерін бақылау жүйесі</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A1F26;
+    --deep:#0E2B33;
+    --panel:#123640;
+    --aqua:#3FCFC0;
+    --aqua-dim:#2A9C90;
+    --sand:#E7B96A;
+    --sand-dim:#C99A4A;
+    --mist:#EAF3F1;
+    --mist-dim:#B9CBC8;
+    --line:rgba(234,243,241,0.14);
+    --shadow: 0 20px 50px rgba(4,15,18,0.45);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--mist);
+    font-family:'Space Grotesk', sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.serif{
+    font-family:'Newsreader', serif;
+    font-weight:500;
+    letter-spacing:-0.01em;
+    margin:0;
+  }
+  p{margin:0;}
+  img{max-width:100%;display:block;}
+  a{color:inherit;}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px;}
+
+  /* ---------- top nav ---------- */
+  header.nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(10,31,38,0.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{
+    max-width:1120px;margin:0 auto;padding:16px 28px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-family:'Newsreader',serif;font-size:1.25rem;color:var(--mist);}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--aqua);box-shadow:0 0 12px var(--aqua);}
+  .lang-switch{display:flex;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px;}
+  .lang-switch button{
+    border:none;background:transparent;color:var(--mist-dim);
+    padding:6px 13px;border-radius:999px;font-family:'Space Grotesk';font-size:0.8rem;
+    cursor:pointer;transition:all .2s ease;
+  }
+  .lang-switch button.active{background:var(--aqua);color:var(--ink);font-weight:600;}
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;overflow:hidden;
+    padding:88px 0 110px;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(63,207,192,0.20), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 10%, rgba(231,185,106,0.10), transparent 55%),
+      linear-gradient(180deg,#0A1F26 0%, #0D2731 100%);
+  }
+  .hero .wrap{position:relative;z-index:2;}
+  .eyebrow-row{display:flex;align-items:center;gap:14px;margin-bottom:26px;}
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;
+    border:1px solid var(--line);border-radius:999px;
+    padding:7px 14px;font-size:0.82rem;color:var(--mist-dim);
+  }
+  .hero h1{
+    font-size:clamp(2.4rem, 5.4vw, 4.1rem);
+    color:var(--mist);max-width:820px;
+  }
+  .hero h1 em{color:var(--aqua);font-style:normal;}
+  .hero .lede{
+    max-width:620px;margin-top:22px;font-size:1.08rem;color:var(--mist-dim);
+  }
+  .hero-stats{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+    margin-top:56px;border-top:1px solid var(--line);
+    background:var(--line);
+  }
+  .hero-stats > div{background:var(--ink);padding:22px 22px 20px 0;}
+  .hero-stats .num{font-family:'Newsreader',serif;font-size:2.1rem;color:var(--aqua);}
+  .hero-stats .lbl{font-size:0.86rem;color:var(--mist-dim);margin-top:4px;max-width:220px;}
+  .wave{position:absolute;bottom:-2px;left:0;width:100%;line-height:0;z-index:1;opacity:0.9;}
+
+  /* ---------- section shell ---------- */
+  section{padding:88px 0;}
+  .section-head{max-width:640px;margin-bottom:48px;}
+  .kicker{color:var(--sand);font-size:0.86rem;margin-bottom:10px;display:block;}
+  .section-head h2{font-size:clamp(1.7rem,3vw,2.4rem);color:var(--mist);}
+  .section-head p{margin-top:16px;color:var(--mist-dim);font-size:1.02rem;}
+
+  .problem{background:var(--deep);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .problem-grid{display:grid;grid-template-columns:1.1fr 0.9fr;gap:60px;align-items:start;}
+  .problem-grid p{color:var(--mist-dim);font-size:1.02rem;margin-bottom:16px;}
+  .problem-grid p:last-child{margin-bottom:0;}
+  .callout{
+    background:var(--panel);border:1px solid var(--line);border-radius:6px;
+    padding:30px;
+  }
+  .callout .big{font-family:'Newsreader',serif;font-size:3rem;color:var(--sand);line-height:1;}
+  .callout .cap{margin-top:10px;color:var(--mist-dim);font-size:0.92rem;}
+
+  /* ---------- modules ---------- */
+  .modules-list{display:flex;flex-direction:column;gap:2px;background:var(--line);}
+  .module{
+    display:grid;grid-template-columns:0.9fr 1.1fr;gap:0;
+    background:var(--ink);
+  }
+  .module:nth-child(even){grid-template-columns:1.1fr 0.9fr;}
+  .module:nth-child(even) .module-media{order:2;}
+  .module-media{position:relative;overflow:hidden;min-height:340px;}
+  .module-media img{width:100%;height:100%;object-fit:cover;min-height:340px;}
+  .module-body{padding:44px;display:flex;flex-direction:column;justify-content:center;}
+  .module-tag{color:var(--aqua);font-size:0.82rem;margin-bottom:12px;}
+  .module-body h3{font-size:1.6rem;color:var(--mist);margin-bottom:14px;}
+  .module-body p{color:var(--mist-dim);font-size:0.98rem;margin-bottom:10px;}
+  .module-specs{list-style:none;padding:0;margin:18px 0 0;display:flex;flex-wrap:wrap;gap:8px;}
+  .module-specs li{
+    border:1px solid var(--line);border-radius:999px;padding:6px 13px;
+    font-size:0.8rem;color:var(--mist-dim);
+  }
+
+  /* ---------- achievements ---------- */
+  .achieve{background:var(--deep);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .achieve-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+  .achieve-card{background:var(--panel);padding:32px;}
+  .achieve-card .icon{
+    width:42px;height:42px;border-radius:50%;
+    border:1px solid var(--aqua-dim);display:flex;align-items:center;justify-content:center;
+    margin-bottom:18px;color:var(--aqua);font-family:'Newsreader',serif;font-size:1.1rem;
+  }
+  .achieve-card h4{font-family:'Newsreader',serif;font-weight:500;font-size:1.15rem;color:var(--mist);margin-bottom:10px;}
+  .achieve-card p{color:var(--mist-dim);font-size:0.94rem;}
+
+  /* ---------- team ---------- */
+  .team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+  .team-card{border:1px solid var(--line);border-radius:6px;padding:22px 20px;background:var(--panel);}
+  .team-card .role{color:var(--aqua);font-size:0.78rem;margin-bottom:10px;}
+  .team-card .name{font-family:'Newsreader',serif;font-size:1.12rem;color:var(--mist);}
+  .school-note{margin-top:36px;border-top:1px solid var(--line);padding-top:28px;color:var(--mist-dim);font-size:0.92rem;max-width:680px;}
+
+  /* ---------- assistant ---------- */
+  .assistant{background:var(--deep);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .assistant-shell{
+    display:grid;grid-template-columns:0.85fr 1.15fr;gap:50px;align-items:start;
+  }
+  .chat-box{
+    background:var(--panel);border:1px solid var(--line);border-radius:8px;
+    overflow:hidden;box-shadow:var(--shadow);
+  }
+  .chat-head{
+    padding:16px 20px;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;
+  }
+  .chat-head .dot{width:8px;height:8px;border-radius:50%;background:var(--aqua);box-shadow:0 0 10px var(--aqua);}
+  .chat-head span{font-size:0.9rem;color:var(--mist-dim);}
+  .chat-log{padding:20px;min-height:220px;max-height:360px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;}
+  .msg{max-width:88%;padding:12px 15px;border-radius:10px;font-size:0.92rem;line-height:1.5;}
+  .msg.bot{background:rgba(63,207,192,0.10);border:1px solid rgba(63,207,192,0.25);align-self:flex-start;color:var(--mist);}
+  .msg.user{background:rgba(231,185,106,0.14);border:1px solid rgba(231,185,106,0.3);align-self:flex-end;color:var(--mist);}
+  .chat-suggest{padding:0 20px 16px;display:flex;flex-wrap:wrap;gap:8px;}
+  .chat-suggest button{
+    background:transparent;border:1px solid var(--line);color:var(--mist-dim);
+    border-radius:999px;padding:7px 13px;font-size:0.78rem;cursor:pointer;font-family:'Space Grotesk';
+    transition:border-color .2s;
+  }
+  .chat-suggest button:hover{border-color:var(--aqua);color:var(--mist);}
+  .chat-input{display:flex;border-top:1px solid var(--line);}
+  .chat-input input{
+    flex:1;background:transparent;border:none;padding:15px 18px;color:var(--mist);
+    font-family:'Space Grotesk';font-size:0.92rem;outline:none;
+  }
+  .chat-input button{
+    background:var(--aqua);color:var(--ink);border:none;padding:0 22px;font-weight:600;
+    cursor:pointer;font-family:'Space Grotesk';font-size:0.9rem;
+  }
+  .assistant-copy p{color:var(--mist-dim);margin-bottom:14px;font-size:0.98rem;}
+  .assistant-copy ul{padding-left:18px;margin:18px 0;color:var(--mist-dim);font-size:0.92rem;}
+  .assistant-copy li{margin-bottom:8px;}
+
+  /* ---------- contact ---------- */
+  .contact{text-align:center;padding:100px 0;}
+  .contact h2{font-size:clamp(1.8rem,3.4vw,2.6rem);color:var(--mist);max-width:640px;margin:0 auto;}
+  .contact p{color:var(--mist-dim);margin-top:18px;max-width:520px;margin-left:auto;margin-right:auto;}
+  .wa-btn{
+    margin-top:34px;display:inline-flex;align-items:center;gap:10px;
+    background:var(--aqua);color:var(--ink);padding:16px 30px;border-radius:999px;
+    font-weight:600;font-size:1rem;text-decoration:none;
+    box-shadow:0 14px 30px rgba(63,207,192,0.25);
+    transition:transform .2s ease;
+  }
+  .wa-btn:hover{transform:translateY(-2px);}
+  .contact-num{margin-top:14px;color:var(--mist-dim);font-size:0.9rem;letter-spacing:0.02em;}
+
+  footer{border-top:1px solid var(--line);padding:34px 0;}
+  .footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+  footer p{color:var(--mist-dim);font-size:0.82rem;}
+
+  /* floating whatsapp */
+  .float-wa{
+    position:fixed;bottom:24px;right:24px;z-index:60;
+    width:58px;height:58px;border-radius:50%;
+    background:var(--aqua);display:flex;align-items:center;justify-content:center;
+    box-shadow:0 10px 26px rgba(63,207,192,0.4);
+    text-decoration:none;
+  }
+  .float-wa svg{width:28px;height:28px;fill:var(--ink);}
+
+  @media (max-width:860px){
+    .problem-grid,.assistant-shell{grid-template-columns:1fr;gap:32px;}
+    .module,.module:nth-child(even){grid-template-columns:1fr;}
+    .module:nth-child(even) .module-media{order:0;}
+    .module-media img{min-height:230px;}
+    .hero-stats{grid-template-columns:1fr;}
+    .hero-stats > div{padding:18px 0;}
+    .achieve-grid{grid-template-columns:1fr;}
+    .team-grid{grid-template-columns:repeat(2,1fr);}
+    .module-body{padding:30px 24px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <div class="brand"><span class="dot"></span>Smart Aqua</div>
+    <div class="lang-switch">
+      <button data-lang="kk" class="active">KAZ</button>
+      <button data-lang="ru">RUS</button>
+      <button data-lang="en">ENG</button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="eyebrow-row">
+      <span class="badge" data-i18n="hero.badge">IMPACT CHALLENGE 2026: СУ РЕСУРСТАРЫ</span>
+    </div>
+    <h1 data-i18n="hero.title">Су көздерінің жағдайын <em>үздіксіз</em> бақылайтын цифрлық жүйе</h1>
+    <p class="lede" data-i18n="hero.lede">Дрон, жағалау роботы және су тазарту қондырғысынан тұратын «Smart Aqua» — Қазақстанның су ресурстарын қашықтықтан бақылап, ластану мен тапшылықтың алдын алуға арналған жұмыс істейтін прототип.</p>
+    <div class="hero-stats">
+      <div>
+        <div class="num">2050</div>
+        <div class="lbl" data-i18n="hero.stat1">жылға қарай Қазақстанда су тапшылығы күтілуде — ғалымдар болжамы</div>
+      </div>
+      <div>
+        <div class="num">3</div>
+        <div class="lbl" data-i18n="hero.stat2">өзара байланысты модуль: дрон, робот, тазарту қондырғысы</div>
+      </div>
+      <div>
+        <div class="num">4</div>
+        <div class="lbl" data-i18n="hero.stat3">ай бойы прототипті дамыту және сынақтан өткізу жұмысы</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="problem">
+  <div class="wrap problem-grid">
+    <div>
+      <span class="kicker" data-i18n="problem.kicker">МӘСЕЛЕ</span>
+      <h2 style="margin-bottom:20px;" data-i18n="problem.title">Таза су — азайып бара жатқан ресурс</h2>
+      <p data-i18n="problem.p1">Климаттың өзгеруі, өзен ағындарының қысқаруы және су тұтынудың артуы салдарынан Қазақстанда таза ауыз су ресурстарының тапшылығы мәселесі күн санап өзектілене түсуде.</p>
+      <p data-i18n="problem.p2">Дәстүрлі бақылау әдістері — қолмен сынама алу мен кезеңдік зертханалық талдау — уақыт пен адами ресурстарды көп талап етеді және қиын жетімді өңірлерді толық қамти алмайды.</p>
+      <p data-i18n="problem.p3">Осыны шешу үшін біз цифрлық технологияларды — ұшқыш аппараттарды, робототехниканы және сенсорлық жүйелерді — біріктірген «Smart Aqua» кешенді мониторинг жүйесінің прототипін жасадық.</p>
+    </div>
+    <div class="callout">
+      <div class="big" data-i18n="problem.goalnum">Мақсат</div>
+      <p style="margin-top:14px;color:var(--mist);font-size:1rem;" data-i18n="problem.goal">Су көздерінің экологиялық жағдайын дрон, робот және сенсорлық жүйелер негізінде үздіксіз бақылауға және деректерді цифрлық платформа арқылы жинақтауға мүмкіндік беретін жүйе құру.</p>
+      <div class="cap" data-i18n="problem.method">Қолданылған негіз: Arduino микроконтроллері, HC-SR04 ультрадыбыстық сенсоры, сервоприводтар, квадрокоптерлік ұшу платформасы, гидравликалық тазарту қондырғысы.</div>
+    </div>
+  </div>
+</section>
+
+<section class="modules">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker" data-i18n="modules.kicker">ЖҮЙЕ ҚҰРЫЛЫМЫ</span>
+      <h2 data-i18n="modules.title">Үш модульден тұратын жұмыс істейтін прототип</h2>
+      <p data-i18n="modules.lede">Әр модуль өз алдына сынақтан өткен, ал деректер болашақта ортақ веб-платформаға жиналатын болып жобаланған.</p>
+    </div>
+  </div>
+  <div class="modules-list">
+    <div class="module">
+      <div class="module-media"><img src="drone.jpg" alt="Smart Aqua мониторингтік дрон прототипі"></div>
+      <div class="module-body">
+        <span class="module-tag" data-i18n="mod1.tag">01 — МОНИТОРИНГТІК ДРОН</span>
+        <h3 data-i18n="mod1.title">Су қайнар көздерін іздейтін ұшқыш аппарат</h3>
+        <p data-i18n="mod1.p1">Квадрокоптер платформасына жердің ылғалдылығы мен рельефін бағалайтын датчик және геолокация модулі орнатылған — бұл берілген аумақ бойынша ұшып өтіп, жер асты су көздерінің болжамды орналасуын анықтауға мүмкіндік береді.</p>
+        <p data-i18n="mod1.p2">Дронға бекітілген камера өзен, көл және теңіз беттерін суретке түсіріп, судың лайлануын, түсінің өзгеруін және беткі ластану белгілерін қашықтықтан тіркейді, осылайша ықтимал бактериологиялық қауіп ошақтарын алдын ала анықтайды.</p>
+        <ul class="module-specs">
+          <li data-i18n="mod1.s1">Ылғалдылық/геолокация сенсоры</li>
+          <li data-i18n="mod1.s2">Бейнекамера модулі</li>
+          <li data-i18n="mod1.s3">Квадрокоптер ұшу платформасы</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="module">
+      <div class="module-media"><img src="robot.jpg" alt="Smart Aqua жағалау мониторингі роботы"></div>
+      <div class="module-body">
+        <span class="module-tag" data-i18n="mod2.tag">02 — ЖАҒАЛАУ МОНИТОРИНГІ РОБОТЫ</span>
+        <h3 data-i18n="mod2.title">Жерүсті деректерін жинайтын автономды робот</h3>
+        <p data-i18n="mod2.p1">Arduino негізіндегі басқару платасы, HC-SR04 ультрадыбыстық сенсоры және сервоприводтар арқылы жиналған робот су объектісінің жағалауы бойымен қозғалып, кедергілерді анықтайды.</p>
+        <p data-i18n="mod2.p2">Робот дронмен бірге кешенді жерүсті-әуе мониторинг жүйесін құрайды және қосымша бақылау деректерін жинайды.</p>
+        <ul class="module-specs">
+          <li data-i18n="mod2.s1">Arduino контроллері</li>
+          <li data-i18n="mod2.s2">Ультрадыбыстық қашықтық сенсоры</li>
+          <li data-i18n="mod2.s3">Автономды қозғалыс</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="module">
+      <div class="module-media"><img src="purifier.jpg" alt="Smart Aqua су тазарту және сақтау қондырғысы"></div>
+      <div class="module-body">
+        <span class="module-tag" data-i18n="mod3.tag">03 — ТАЗАРТУ ЖӘНЕ САҚТАУ ҚОНДЫРҒЫСЫ</span>
+        <h3 data-i18n="mod3.title">Су тазарту циклін көрсететін демонстрациялық қондырғы</h3>
+        <p data-i18n="mod3.p1">Айналымды сорғы, гидравликалық цилиндрлер және ток көзінен тұратын қондырғы арқылы судың тазару және сақталу циклі демонстрацияланады.</p>
+        <p data-i18n="mod3.p2">Бұл модуль болашақта анықталған ластану ошақтарында алғашқы тазарту шараларын автоматты түрде жүзеге асыратын жүйенің негізі ретінде қарастырылады.</p>
+        <ul class="module-specs">
+          <li data-i18n="mod3.s1">Айналымды сорғы</li>
+          <li data-i18n="mod3.s2">Гидравликалық цилиндрлер</li>
+          <li data-i18n="mod3.s3">Тазарту-сақтау циклі</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="achieve">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker" data-i18n="ach.kicker">ЖОЛ КАРТАСЫ</span>
+      <h2 data-i18n="ach.title">Жобаның жүрген жолы</h2>
+      <p data-i18n="ach.lede">Прототипті құрастырудан бастап, жобаны танымал алаңдарда таныстыруға дейін.</p>
+    </div>
+    <div class="achieve-grid">
+      <div class="achieve-card">
+        <div class="icon">1</div>
+        <h4 data-i18n="ach1.h">Вице-министрге таныстырылды</h4>
+        <p data-i18n="ach1.p">Жоба цифрландыру саласының вице-министрі Дмитрий Мунға көрсетіліп, жүйенің жұмыс принципі таныстырылды.</p>
+      </div>
+      <div class="achieve-card">
+        <div class="icon">2</div>
+        <h4 data-i18n="ach2.h">Президент кеңесшісіне таныстырылды</h4>
+        <p data-i18n="ach2.p">Жобаны Президент кеңесшісі Мәлік Отарбаевқа таныстыру мүмкіндігі болды.</p>
+      </div>
+      <div class="achieve-card">
+        <div class="icon">3</div>
+        <h4 data-i18n="ach3.h">АҚШ-қа сапарға жолдама</h4>
+        <p data-i18n="ach3.p">Осы жоба арқылы авторлар АҚШ-қа танысу сапарына жолдама жеңіп алды.</p>
+      </div>
+      <div class="achieve-card">
+        <div class="icon">4</div>
+        <h4 data-i18n="ach4.h">Дамытуға грант қолдауы</h4>
+        <p data-i18n="ach4.p">Жобаны жетілдіруге жоғары оқу орны тарапынан гранттық қолдау бөлінді, жүйе 4 ай бойы дамыту сатысынан өтуде.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="team">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker" data-i18n="team.kicker">ЖОБА ТОБЫ</span>
+      <h2 data-i18n="team.title">Авторлар мен жетекші</h2>
+    </div>
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="role" data-i18n="team.role1">11-сынып оқушысы</div>
+        <div class="name">Зупар Қуаныш Омарұлы</div>
+      </div>
+      <div class="team-card">
+        <div class="role" data-i18n="team.role1">11-сынып оқушысы</div>
+        <div class="name">Матен Дилара Асхатқызы</div>
+      </div>
+      <div class="team-card">
+        <div class="role" data-i18n="team.role1">11-сынып оқушысы</div>
+        <div class="name">Айтақын Сырым Ғалымнұрұлы</div>
+      </div>
+      <div class="team-card">
+        <div class="role" data-i18n="team.role2">Жоба жетекшісі, география пәні мұғалімі</div>
+        <div class="name">Мұрат Балсая Жақсылыққызы</div>
+      </div>
+    </div>
+    <div class="school-note" data-i18n="team.school">«Алматы облысы білім басқармасының Іле ауданы бойынша білім бөлімі» мемлекеттік мекемесінің «№28 мектеп-гимназия» мемлекеттік коммуналдық мекемесі, Іле ауданы.</div>
+  </div>
+</section>
+
+<section class="assistant">
+  <div class="wrap assistant-shell">
+    <div class="assistant-copy">
+      <span class="kicker" data-i18n="ai.kicker">SMART AQUA AI</span>
+      <h2 style="margin-bottom:18px;" data-i18n="ai.title">Су сапасы туралы сұрағыңыз бар ма?</h2>
+      <p data-i18n="ai.p1">Төмендегі көмекші жоба, оның модульдері және су мәселесі бойынша жиі қойылатын сұрақтарға дереу жауап береді.</p>
+      <ul>
+        <li data-i18n="ai.li1">Дрон мен роботтың қалай жұмыс істейтінін сұраңыз</li>
+        <li data-i18n="ai.li2">Су тазарту қондырғысының циклі туралы білуге болады</li>
+        <li data-i18n="ai.li3">Нақты су мәселесі бойынша хабарласқыңыз келсе — WhatsApp арқылы жазыңыз</li>
+      </ul>
+      <p data-i18n="ai.p2">Жүйе бетінде көрсетілген ақпарат негізінде жауап береді; жеке жағдайыңызды тексерту үшін төмендегі байланыс түймесін басыңыз.</p>
+    </div>
+    <div class="chat-box">
+      <div class="chat-head"><span class="dot"></span><span data-i18n="ai.head">Smart Aqua көмекшісі — онлайн</span></div>
+      <div class="chat-log" id="chatLog"></div>
+      <div class="chat-suggest" id="chatSuggest"></div>
+      <div class="chat-input">
+        <input type="text" id="chatInput" data-i18n-ph="ai.placeholder" placeholder="Сұрағыңызды жазыңыз...">
+        <button id="chatSend" data-i18n="ai.send">Жіберу</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact">
+  <div class="wrap">
+    <h2 data-i18n="contact.title">Су сапасы төмендеп жатса — бізге жазыңыз</h2>
+    <p data-i18n="contact.p">Жоба тобымен тікелей байланысу үшін WhatsApp арқылы хабарласыңыз, сұрағыңызға жедел жауап береміз.</p>
+    <a class="wa-btn" id="waMain" href="https://wa.me/77470496433" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.51 2 12.04 2Zm5.8 14.08c-.24.68-1.39 1.32-1.92 1.4-.49.08-1.11.11-1.79-.11-.41-.13-.94-.31-1.62-.6-2.85-1.23-4.7-4.1-4.84-4.29-.14-.19-1.16-1.54-1.16-2.94s.73-2.09.99-2.37c.26-.29.56-.36.75-.36h.53c.17 0 .4-.06.62.48.24.58.8 2.01.87 2.15.07.14.11.31.02.5-.09.19-.14.31-.28.47-.14.16-.29.36-.42.48-.14.14-.28.28-.12.55.16.28.71 1.17 1.53 1.9 1.05.94 1.94 1.23 2.22 1.37.28.14.44.12.6-.07.16-.19.68-.79.86-1.06.18-.28.36-.23.6-.14.24.09 1.53.72 1.79.85.26.14.44.2.5.32.06.13.06.71-.18 1.38Z"/></svg>
+      <span data-i18n="contact.btn">WhatsApp арқылы жазу</span>
+    </a>
+    <div class="contact-num">+7 747 049 6433</div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-inner">
+    <p data-i18n="footer.school">№28 мектеп-гимназия, Іле ауданы, Алматы облысы</p>
+    <p>Smart Aqua — Impact Challenge 2026</p>
+  </div>
+</footer>
+
+<a class="float-wa" href="https://wa.me/77470496433" target="_blank" rel="noopener" aria-label="WhatsApp">
+  <svg viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.51 2 12.04 2Zm5.8 14.08c-.24.68-1.39 1.32-1.92 1.4-.49.08-1.11.11-1.79-.11-.41-.13-.94-.31-1.62-.6-2.85-1.23-4.7-4.1-4.84-4.29-.14-.19-1.16-1.54-1.16-2.94s.73-2.09.99-2.37c.26-.29.56-.36.75-.36h.53c.17 0 .4-.06.62.48.24.58.8 2.01.87 2.15.07.14.11.31.02.5-.09.19-.14.31-.28.47-.14.16-.29.36-.42.48-.14.14-.28.28-.12.55.16.28.71 1.17 1.53 1.9 1.05.94 1.94 1.23 2.22 1.37.28.14.44.12.6-.07.16-.19.68-.79.86-1.06.18-.28.36-.23.6-.14.24.09 1.53.72 1.79.85.26.14.44.2.5.32.06.13.06.71-.18 1.38Z"/></svg>
+</a>
+
+<script>
+/* ===================== i18n ===================== */
+const translations = {
+  kk: {
+    "hero.badge":"IMPACT CHALLENGE 2026: СУ РЕСУРСТАРЫ",
+    "hero.title":"Су көздерінің жағдайын <em>үздіксіз</em> бақылайтын цифрлық жүйе",
+    "hero.lede":"Дрон, жағалау роботы және су тазарту қондырғысынан тұратын «Smart Aqua» — Қазақстанның су ресурстарын қашықтықтан бақылап, ластану мен тапшылықтың алдын алуға арналған жұмыс істейтін прототип.",
+    "hero.stat1":"жылға қарай Қазақстанда су тапшылығы күтілуде — ғалымдар болжамы",
+    "hero.stat2":"өзара байланысты модуль: дрон, робот, тазарту қондырғысы",
+    "hero.stat3":"ай бойы прототипті дамыту және сынақтан өткізу жұмысы",
+    "problem.kicker":"МӘСЕЛЕ",
+    "problem.title":"Таза су — азайып бара жатқан ресурс",
+    "problem.p1":"Климаттың өзгеруі, өзен ағындарының қысқаруы және су тұтынудың артуы салдарынан Қазақстанда таза ауыз су ресурстарының тапшылығы мәселесі күн санап өзектілене түсуде.",
+    "problem.p2":"Дәстүрлі бақылау әдістері — қолмен сынама алу мен кезеңдік зертханалық талдау — уақыт пен адами ресурстарды көп талап етеді және қиын жетімді өңірлерді толық қамти алмайды.",
+    "problem.p3":"Осыны шешу үшін біз цифрлық технологияларды — ұшқыш аппараттарды, робототехниканы және сенсорлық жүйелерді — біріктірген «Smart Aqua» кешенді мониторинг жүйесінің прототипін жасадық.",
+    "problem.goalnum":"Мақсат",
+    "problem.goal":"Су көздерінің экологиялық жағдайын дрон, робот және сенсорлық жүйелер негізінде үздіксіз бақылауға және деректерді цифрлық платформа арқылы жинақтауға мүмкіндік беретін жүйе құру.",
+    "problem.method":"Қолданылған негіз: Arduino микроконтроллері, HC-SR04 ультрадыбыстық сенсоры, сервоприводтар, квадрокоптерлік ұшу платформасы, гидравликалық тазарту қондырғысы.",
+    "modules.kicker":"ЖҮЙЕ ҚҰРЫЛЫМЫ",
+    "modules.title":"Үш модульден тұратын жұмыс істейтін прототип",
+    "modules.lede":"Әр модуль өз алдына сынақтан өткен, ал деректер болашақта ортақ веб-платформаға жиналатын болып жобаланған.",
+    "mod1.tag":"01 — МОНИТОРИНГТІК ДРОН",
+    "mod1.title":"Су қайнар көздерін іздейтін ұшқыш аппарат",
+    "mod1.p1":"Квадрокоптер платформасына жердің ылғалдылығы мен рельефін бағалайтын датчик және геолокация модулі орнатылған — бұл берілген аумақ бойынша ұшып өтіп, жер асты су көздерінің болжамды орналасуын анықтауға мүмкіндік береді.",
+    "mod1.p2":"Дронға бекітілген камера өзен, көл және теңіз беттерін суретке түсіріп, судың лайлануын, түсінің өзгеруін және беткі ластану белгілерін қашықтықтан тіркейді, осылайша ықтимал бактериологиялық қауіп ошақтарын алдын ала анықтайды.",
+    "mod1.s1":"Ылғалдылық/геолокация сенсоры","mod1.s2":"Бейнекамера модулі","mod1.s3":"Квадрокоптер ұшу платформасы",
+    "mod2.tag":"02 — ЖАҒАЛАУ МОНИТОРИНГІ РОБОТЫ",
+    "mod2.title":"Жерүсті деректерін жинайтын автономды робот",
+    "mod2.p1":"Arduino негізіндегі басқару платасы, HC-SR04 ультрадыбыстық сенсоры және сервоприводтар арқылы жиналған робот су объектісінің жағалауы бойымен қозғалып, кедергілерді анықтайды.",
+    "mod2.p2":"Робот дронмен бірге кешенді жерүсті-әуе мониторинг жүйесін құрайды және қосымша бақылау деректерін жинайды.",
+    "mod2.s1":"Arduino контроллері","mod2.s2":"Ультрадыбыстық қашықтық сенсоры","mod2.s3":"Автономды қозғалыс",
+    "mod3.tag":"03 — ТАЗАРТУ ЖӘНЕ САҚТАУ ҚОНДЫРҒЫСЫ",
+    "mod3.title":"Су тазарту циклін көрсететін демонстрациялық қондырғы",
+    "mod3.p1":"Айналымды сорғы, гидравликалық цилиндрлер және ток көзінен тұратын қондырғы арқылы судың тазару және сақталу циклі демонстрацияланады.",
+    "mod3.p2":"Бұл модуль болашақта анықталған ластану ошақтарында алғашқы тазарту шараларын автоматты түрде жүзеге асыратын жүйенің негізі ретінде қарастырылады.",
+    "mod3.s1":"Айналымды сорғы","mod3.s2":"Гидравликалық цилиндрлер","mod3.s3":"Тазарту-сақтау циклі",
+    "ach.kicker":"ЖОЛ КАРТАСЫ","ach.title":"Жобаның жүрген жолы",
+    "ach.lede":"Прототипті құрастырудан бастап, жобаны танымал алаңдарда таныстыруға дейін.",
+    "ach1.h":"Вице-министрге таныстырылды","ach1.p":"Жоба цифрландыру саласының вице-министрі Дмитрий Мунға көрсетіліп, жүйенің жұмыс принципі таныстырылды.",
+    "ach2.h":"Президент кеңесшісіне таныстырылды","ach2.p":"Жобаны Президент кеңесшісі Мәлік Отарбаевқа таныстыру мүмкіндігі болды.",
+    "ach3.h":"АҚШ-қа сапарға жолдама","ach3.p":"Осы жоба арқылы авторлар АҚШ-қа танысу сапарына жолдама жеңіп алды.",
+    "ach4.h":"Дамытуға грант қолдауы","ach4.p":"Жобаны жетілдіруге жоғары оқу орны тарапынан гранттық қолдау бөлінді, жүйе 4 ай бойы дамыту сатысынан өтуде.",
+    "team.kicker":"ЖОБА ТОБЫ","team.title":"Авторлар мен жетекші",
+    "team.role1":"11-сынып оқушысы","team.role2":"Жоба жетекшісі, география пәні мұғалімі",
+    "team.school":"«Алматы облысы білім басқармасының Іле ауданы бойынша білім бөлімі» мемлекеттік мекемесінің «№28 мектеп-гимназия» мемлекеттік коммуналдық мекемесі, Іле ауданы.",
+    "ai.kicker":"SMART AQUA AI","ai.title":"Су сапасы туралы сұрағыңыз бар ма?",
+    "ai.p1":"Төмендегі көмекші жоба, оның модульдері және су мәселесі бойынша жиі қойылатын сұрақтарға дереу жауап береді.",
+    "ai.li1":"Дрон мен роботтың қалай жұмыс істейтінін сұраңыз",
+    "ai.li2":"Су тазарту қондырғысының циклі туралы білуге болады",
+    "ai.li3":"Нақты су мәселесі бойынша хабарласқыңыз келсе — WhatsApp арқылы жазыңыз",
+    "ai.p2":"Жүйе бетінде көрсетілген ақпарат негізінде жауап береді; жеке жағдайыңызды тексерту үшін төмендегі байланыс түймесін басыңыз.",
+    "ai.head":"Smart Aqua көмекшісі — онлайн",
+    "ai.placeholder":"Сұрағыңызды жазыңыз...","ai.send":"Жіберу",
+    "contact.title":"Су сапасы төмендеп жатса — бізге жазыңыз",
+    "contact.p":"Жоба тобымен тікелей байланысу үшін WhatsApp арқылы хабарласыңыз, сұрағыңызға жедел жауап береміз.",
+    "contact.btn":"WhatsApp арқылы жазу",
+    "footer.school":"№28 мектеп-гимназия, Іле ауданы, Алматы облысы",
+    "greet":"Сәлем! Мен Smart Aqua жобасының көмекшісімін. Дрон, робот, тазарту қондырғысы немесе су мәселесі туралы сұрай аласыз.",
+    "fallback":"Бұл сұрақ бойынша нақты жауапты жоба тобынан білген дұрыс. Төмендегі WhatsApp түймесі арқылы бізге тікелей жазыңыз.",
+    "q1":"Дрон қалай жұмыс істейді?","a1":"Дрон квадрокоптер платформасына орнатылған ылғалдылық пен геолокация сенсорлары арқылы жер асты су көздерінің болжамды орналасуын анықтайды, ал бекітілген камера су беттерінің ластануын қашықтықтан тіркейді.",
+    "q2":"Робот не үшін керек?","a2":"Жағалау мониторингі роботы Arduino платасы, ультрадыбыстық сенсор және сервоприводтар арқылы су объектісінің жағалауы бойымен қозғалып, кедергілерді анықтап, қосымша мониторинг деректерін жинайды.",
+    "q3":"Су тазарту қондырғысы қалай жұмыс істейді?","a3":"Айналымды сорғы мен гидравликалық цилиндрлер арқылы судың тазару және сақталу циклі демонстрацияланады, бұл модуль болашақта автоматты тазарту жүйесінің негізі болады.",
+    "q4":"2050 жылға дейін не болады?","a4":"Сарапшылардың бағалауынша, қазіргі үрдіс жалғасса, 2050 жылға қарай Қазақстан су тапшылығына тап болуы мүмкін, сондықтан үздіксіз мониторинг қазірден бастап маңызды.",
+    "q5":"Жобамен қалай хабарласуға болады?","a5":"Су сапасы мәселесі бойынша тікелей хабарласу үшін осы беттегі WhatsApp түймесін басыңыз, нөмір: +7 747 049 6433."
+  },
+  ru: {
+    "hero.badge":"IMPACT CHALLENGE 2026: ВОДНЫЕ РЕСУРСЫ",
+    "hero.title":"Цифровая система <em>непрерывного</em> контроля состояния водных источников",
+    "hero.lede":"«Smart Aqua» — дрон, прибрежный робот и установка очистки воды, работающий прототип для дистанционного мониторинга водных ресурсов Казахстана и предотвращения загрязнения и дефицита воды.",
+    "hero.stat1":"к этому году в Казахстане прогнозируется дефицит воды — оценка учёных",
+    "hero.stat2":"взаимосвязанных модуля: дрон, робот, установка очистки",
+    "hero.stat3":"месяца разработки и испытания прототипа",
+    "problem.kicker":"ПРОБЛЕМА",
+    "problem.title":"Чистая вода — ресурс, который сокращается",
+    "problem.p1":"Из-за изменения климата, сокращения речного стока и роста водопотребления проблема дефицита чистой питьевой воды в Казахстане становится всё острее.",
+    "problem.p2":"Традиционные методы контроля — ручной забор проб и периодический лабораторный анализ — требуют много времени и ресурсов и не охватывают труднодоступные регионы.",
+    "problem.p3":"Чтобы решить это, мы разработали прототип комплексной системы мониторинга «Smart Aqua», объединяющей беспилотные летательные аппараты, робототехнику и сенсорные системы.",
+    "problem.goalnum":"Цель",
+    "problem.goal":"Создать систему для непрерывного мониторинга экологического состояния водных источников на основе дрона, робота и сенсорных систем со сбором данных через цифровую платформу.",
+    "problem.method":"Используемая база: микроконтроллер Arduino, ультразвуковой датчик HC-SR04, сервоприводы, квадрокоптерная лётная платформа, гидравлическая установка очистки.",
+    "modules.kicker":"СТРУКТУРА СИСТЕМЫ",
+    "modules.title":"Работающий прототип из трёх модулей",
+    "modules.lede":"Каждый модуль протестирован отдельно, а данные в перспективе будут собираться на единой веб-платформе.",
+    "mod1.tag":"01 — МОНИТОРИНГОВЫЙ ДРОН",
+    "mod1.title":"Летательный аппарат для поиска источников воды",
+    "mod1.p1":"На квадрокоптерную платформу установлены датчик влажности и рельефа почвы и модуль геолокации — это позволяет, пролетая над территорией, определять предполагаемое расположение подземных водных источников.",
+    "mod1.p2":"Закреплённая на дроне камера снимает поверхность рек, озёр и морей, дистанционно фиксируя помутнение воды, изменение цвета и признаки поверхностного загрязнения, заранее выявляя очаги возможной бактериологической опасности.",
+    "mod1.s1":"Датчик влажности/геолокации","mod1.s2":"Модуль видеокамеры","mod1.s3":"Квадрокоптерная платформа",
+    "mod2.tag":"02 — РОБОТ БЕРЕГОВОГО МОНИТОРИНГА",
+    "mod2.title":"Автономный робот для сбора наземных данных",
+    "mod2.p1":"Робот, собранный на базе платы Arduino, ультразвукового датчика HC-SR04 и сервоприводов, перемещается вдоль берега водоёма и обнаруживает препятствия.",
+    "mod2.p2":"Вместе с дроном робот образует комплексную наземно-воздушную систему мониторинга и собирает дополнительные данные наблюдения.",
+    "mod2.s1":"Контроллер Arduino","mod2.s2":"Ультразвуковой датчик расстояния","mod2.s3":"Автономное движение",
+    "mod3.tag":"03 — УСТАНОВКА ОЧИСТКИ И ХРАНЕНИЯ",
+    "mod3.title":"Демонстрационная установка цикла очистки воды",
+    "mod3.p1":"С помощью циркуляционного насоса, гидравлических цилиндров и источника питания демонстрируется цикл очистки и хранения воды.",
+    "mod3.p2":"В перспективе этот модуль станет основой системы, автоматически выполняющей первичную очистку в выявленных очагах загрязнения.",
+    "mod3.s1":"Циркуляционный насос","mod3.s2":"Гидравлические цилиндры","mod3.s3":"Цикл очистки и хранения",
+    "ach.kicker":"ХРОНОЛОГИЯ","ach.title":"Путь проекта",
+    "ach.lede":"От сборки прототипа до презентации проекта на значимых площадках.",
+    "ach1.h":"Представлен вице-министру","ach1.p":"Проект был показан вице-министру цифрового развития Дмитрию Муну, с презентацией принципа работы системы.",
+    "ach2.h":"Представлен советнику Президента","ach2.p":"Проект был представлен советнику Президента Малику Отарбаеву.",
+    "ach3.h":"Путёвка в США","ach3.p":"Благодаря этому проекту авторы выиграли ознакомительную поездку в США.",
+    "ach4.h":"Грантовая поддержка на развитие","ach4.p":"На доработку проекта был выделен грант от университета, система проходит стадию развития уже 4 месяца.",
+    "team.kicker":"КОМАНДА ПРОЕКТА","team.title":"Авторы и руководитель",
+    "team.role1":"ученик 11 класса","team.role2":"руководитель проекта, учитель географии",
+    "team.school":"Государственное коммунальное учреждение «Школа-гимназия №28» ГУ «Отдел образования по Илийскому району Управления образования Алматинской области», Илийский район.",
+    "ai.kicker":"SMART AQUA AI","ai.title":"Есть вопрос о качестве воды?",
+    "ai.p1":"Помощник ниже мгновенно отвечает на частые вопросы о проекте, его модулях и водных проблемах.",
+    "ai.li1":"Спросите, как работают дрон и робот",
+    "ai.li2":"Узнайте о цикле установки очистки воды",
+    "ai.li3":"По конкретной проблеме с водой — напишите нам в WhatsApp",
+    "ai.p2":"Система отвечает на основе информации на этой странице; для проверки вашей конкретной ситуации нажмите кнопку связи ниже.",
+    "ai.head":"Помощник Smart Aqua — на связи",
+    "ai.placeholder":"Напишите ваш вопрос...","ai.send":"Отправить",
+    "contact.title":"Если качество воды ухудшается — напишите нам",
+    "contact.p":"Свяжитесь с командой проекта напрямую через WhatsApp, мы оперативно ответим на ваш вопрос.",
+    "contact.btn":"Написать в WhatsApp",
+    "footer.school":"Школа-гимназия №28, Илийский район, Алматинская область",
+    "greet":"Здравствуйте! Я помощник проекта Smart Aqua. Спросите о дроне, роботе, установке очистки или проблеме воды.",
+    "fallback":"Точный ответ на этот вопрос лучше получить у команды проекта. Напишите нам напрямую через кнопку WhatsApp ниже.",
+    "q1":"Как работает дрон?","a1":"Дрон на квадрокоптерной платформе с датчиками влажности и геолокации определяет предполагаемое расположение подземных источников воды, а закреплённая камера дистанционно фиксирует загрязнение водной поверхности.",
+    "q2":"Зачем нужен робот?","a2":"Робот берегового мониторинга на базе Arduino, ультразвукового датчика и сервоприводов перемещается вдоль берега, обнаруживает препятствия и собирает дополнительные данные мониторинга.",
+    "q3":"Как работает установка очистки воды?","a3":"С помощью циркуляционного насоса и гидравлических цилиндров демонстрируется цикл очистки и хранения воды — модуль станет основой автоматической системы очистки.",
+    "q4":"Что произойдёт к 2050 году?","a4":"По оценке экспертов, при сохранении текущей тенденции к 2050 году Казахстан может столкнуться с дефицитом воды, поэтому непрерывный мониторинг важен уже сейчас.",
+    "q5":"Как связаться с проектом?","a5":"Для прямой связи по вопросу качества воды нажмите кнопку WhatsApp на этой странице, номер: +7 747 049 6433."
+  },
+  en: {
+    "hero.badge":"IMPACT CHALLENGE 2026: WATER RESOURCES",
+    "hero.title":"A digital system for <em>continuous</em> monitoring of water sources",
+    "hero.lede":"Smart Aqua combines a drone, a shoreline robot, and a water purification unit — a working prototype for remotely monitoring Kazakhstan's water resources and preventing pollution and shortage.",
+    "hero.stat1":"is the year experts warn Kazakhstan could face water scarcity",
+    "hero.stat2":"interconnected modules: drone, robot, and purification unit",
+    "hero.stat3":"months spent developing and testing the prototype",
+    "problem.kicker":"THE PROBLEM",
+    "problem.title":"Clean water — a shrinking resource",
+    "problem.p1":"Climate change, shrinking river flows, and rising water consumption are making the shortage of clean drinking water in Kazakhstan an increasingly urgent issue.",
+    "problem.p2":"Traditional monitoring methods — manual sampling and periodic lab analysis — take significant time and manpower and cannot fully cover hard-to-reach regions.",
+    "problem.p3":"To address this, we built a prototype of the Smart Aqua monitoring system, combining unmanned aerial vehicles, robotics, and sensor systems.",
+    "problem.goalnum":"Goal",
+    "problem.goal":"Build a system that continuously monitors the ecological condition of water sources using a drone, a robot, and sensor systems, collecting data through a digital platform.",
+    "problem.method":"Technical base: Arduino microcontroller, HC-SR04 ultrasonic sensor, servo drives, a quadcopter flight platform, and a hydraulic purification unit.",
+    "modules.kicker":"SYSTEM STRUCTURE",
+    "modules.title":"A working prototype built from three modules",
+    "modules.lede":"Each module has been tested independently; data is planned to flow into a shared web platform going forward.",
+    "mod1.tag":"01 — MONITORING DRONE",
+    "mod1.title":"An aerial unit that searches for water sources",
+    "mod1.p1":"The quadcopter platform carries a soil moisture and terrain sensor plus a geolocation module, letting it fly over an area and identify the likely location of underground water sources.",
+    "mod1.p2":"An onboard camera photographs the surface of rivers, lakes, and seas, remotely capturing turbidity, color change, and signs of surface pollution — flagging possible bacteriological risk zones in advance.",
+    "mod1.s1":"Moisture / geolocation sensor","mod1.s2":"Onboard camera module","mod1.s3":"Quadcopter flight platform",
+    "mod2.tag":"02 — SHORELINE MONITORING ROBOT",
+    "mod2.title":"An autonomous robot collecting ground-level data",
+    "mod2.p1":"Built on an Arduino control board, an HC-SR04 ultrasonic sensor, and servo drives, the robot moves along the shoreline of a water body and detects obstacles.",
+    "mod2.p2":"Together with the drone, the robot forms a combined ground-air monitoring system, gathering additional observation data.",
+    "mod2.s1":"Arduino controller","mod2.s2":"Ultrasonic distance sensor","mod2.s3":"Autonomous movement",
+    "mod3.tag":"03 — PURIFICATION & STORAGE UNIT",
+    "mod3.title":"A demonstration unit for the water purification cycle",
+    "mod3.p1":"A circulation pump, hydraulic cylinders, and a power source demonstrate the full cycle of purifying and storing water.",
+    "mod3.p2":"This module is planned as the foundation for a future system that automatically performs initial purification at identified pollution sites.",
+    "mod3.s1":"Circulation pump","mod3.s2":"Hydraulic cylinders","mod3.s3":"Purification–storage cycle",
+    "ach.kicker":"TIMELINE","ach.title":"The project's journey",
+    "ach.lede":"From building the prototype to presenting the project on notable stages.",
+    "ach1.h":"Presented to the Vice Minister","ach1.p":"The project was shown to Dmitry Mun, Vice Minister of Digital Development, with a walkthrough of how the system works.",
+    "ach2.h":"Presented to a Presidential Advisor","ach2.p":"The team had the opportunity to present the project to Presidential Advisor Malik Otarbayev.",
+    "ach3.h":"A trip to the USA","ach3.p":"Through this project, the authors won a study/exposure trip to the United States.",
+    "ach4.h":"Grant support for development","ach4.p":"A university provided grant support to further develop the project; the system has been in active development for 4 months.",
+    "team.kicker":"PROJECT TEAM","team.title":"Authors and supervisor",
+    "team.role1":"11th-grade student","team.role2":"Project supervisor, geography teacher",
+    "team.school":"School-Gymnasium No.28, a state institution under the Education Department of Ile District, Almaty Region.",
+    "ai.kicker":"SMART AQUA AI","ai.title":"Have a question about water quality?",
+    "ai.p1":"The assistant below instantly answers common questions about the project, its modules, and water issues.",
+    "ai.li1":"Ask how the drone and robot work",
+    "ai.li2":"Learn about the purification unit's cycle",
+    "ai.li3":"For a specific water issue — reach us on WhatsApp",
+    "ai.p2":"The assistant answers based on information on this page; for your specific situation, use the contact button below.",
+    "ai.head":"Smart Aqua assistant — online",
+    "ai.placeholder":"Type your question...","ai.send":"Send",
+    "contact.title":"If water quality is declining near you — get in touch",
+    "contact.p":"Reach the project team directly on WhatsApp and we'll respond quickly.",
+    "contact.btn":"Message on WhatsApp",
+    "footer.school":"School-Gymnasium No.28, Ile District, Almaty Region",
+    "greet":"Hi! I'm the Smart Aqua project assistant. Ask me about the drone, the robot, the purification unit, or a water issue.",
+    "fallback":"That's a question the project team can best answer directly. Message us on WhatsApp using the button below.",
+    "q1":"How does the drone work?","a1":"The drone uses moisture and geolocation sensors on a quadcopter platform to estimate underground water source locations, while an onboard camera remotely records pollution on water surfaces.",
+    "q2":"What is the robot for?","a2":"The shoreline monitoring robot, built with an Arduino board, ultrasonic sensor, and servo drives, moves along the shore, detects obstacles, and gathers extra monitoring data.",
+    "q3":"How does the purification unit work?","a3":"A circulation pump and hydraulic cylinders demonstrate the water purification and storage cycle — this module is the base for a future automatic purification system.",
+    "q4":"What happens by 2050?","a4":"Experts estimate that, if current trends continue, Kazakhstan could face water scarcity by 2050 — which is why continuous monitoring matters now.",
+    "q5":"How can I contact the project?","a5":"To reach the project directly about a water issue, use the WhatsApp button on this page — the number is +7 747 049 6433."
+  }
+};
+
+let currentLang = 'kk';
+
+function applyLang(lang){
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    if(translations[lang][key] !== undefined){
+      el.innerHTML = translations[lang][key];
+    }
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    const key = el.getAttribute('data-i18n-ph');
+    if(translations[lang][key] !== undefined){
+      el.setAttribute('placeholder', translations[lang][key]);
+    }
+  });
+  document.querySelectorAll('.lang-switch button').forEach(b=>{
+    b.classList.toggle('active', b.getAttribute('data-lang') === lang);
+  });
+  resetChat();
+}
+
+document.querySelectorAll('.lang-switch button').forEach(btn=>{
+  btn.addEventListener('click', ()=> applyLang(btn.getAttribute('data-lang')));
+});
+
+/* ===================== mini FAQ assistant ===================== */
+const chatLog = document.getElementById('chatLog');
+const chatSuggest = document.getElementById('chatSuggest');
+const chatInput = document.getElementById('chatInput');
+const chatSend = document.getElementById('chatSend');
+
+function addMsg(text, who){
+  const div = document.createElement('div');
+  div.className = 'msg ' + who;
+  div.textContent = text;
+  chatLog.appendChild(div);
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+function resetChat(){
+  chatLog.innerHTML = '';
+  addMsg(translations[currentLang]['greet'], 'bot');
+  chatSuggest.innerHTML = '';
+  [1,2,3,4,5].forEach(i=>{
+    const b = document.createElement('button');
+    b.textContent = translations[currentLang]['q'+i];
+    b.addEventListener('click', ()=> handleQuestion(translations[currentLang]['q'+i]));
+    chatSuggest.appendChild(b);
+  });
+}
+
+const keywordMap = {
+  kk: {q1:['дрон'], q2:['робот'], q3:['тазарту','қондырғ'], q4:['2050','тапшы'], q5:['хабарлас','байланыс','телефон','номер','ватсап','whatsapp']},
+  ru: {q1:['дрон'], q2:['робот'], q3:['очист','установ'], q4:['2050','дефицит'], q5:['связ','контакт','телефон','номер','ватсап','whatsapp']},
+  en: {q1:['drone'], q2:['robot'], q3:['purif','clean','filter'], q4:['2050','scarcity'], q5:['contact','phone','number','whatsapp']}
+};
+
+function handleQuestion(text){
+  addMsg(text, 'user');
+  const lower = text.toLowerCase();
+  const map = keywordMap[currentLang];
+  let matched = null;
+  for(const key in map){
+    if(map[key].some(k => lower.includes(k))){ matched = key; break; }
+  }
+  setTimeout(()=>{
+    if(matched){
+      addMsg(translations[currentLang]['a'+matched.slice(1)], 'bot');
+    } else {
+      addMsg(translations[currentLang]['fallback'], 'bot');
+    }
+  }, 350);
+}
+
+chatSend.addEventListener('click', ()=>{
+  const val = chatInput.value.trim();
+  if(!val) return;
+  handleQuestion(val);
+  chatInput.value = '';
+});
+chatInput.addEventListener('keydown', e=>{
+  if(e.key === 'Enter'){ chatSend.click(); }
+});
+
+resetChat();
+</script>
+</body>
+</html>
